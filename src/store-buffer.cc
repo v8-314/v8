@@ -242,7 +242,7 @@ void StoreBuffer::ExemptPopularPages(int prime_sample_step, int threshold) {
       containing_chunk = MemoryChunk::FromAnyPointerAddress(addr);
     }
     int old_counter = containing_chunk->store_buffer_counter();
-    if (old_counter == threshold) {
+    if (old_counter >= threshold) {
       containing_chunk->set_scan_on_scavenge(true);
       created_new_scan_on_scavenge_pages = true;
     }
