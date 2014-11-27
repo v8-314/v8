@@ -709,7 +709,7 @@
             ['OS=="solaris"', {
                 'link_settings': {
                   'libraries': [
-                    '-lsocket -lnsl',
+                    '-lsocket -lnsl -lrt',
                 ]},
                 'sources': [
                   '../../src/platform-solaris.cc',
