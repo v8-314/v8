@@ -29,6 +29,7 @@
 
 #include "log-utils.h"
 #include "string-stream.h"
+#include "version.h"
 
 namespace v8 {
 namespace internal {
@@ -131,6 +132,14 @@ void Log::Initialize() {
         OpenFile(FLAG_logfile);
       }
     }
+  }
+
+  if (output_handle_ != NULL) {
+    LogMessageBuilder msg(logger_);
+    msg.Append("v8-version,%d,%d,%d,%d,%d\n", Version::GetMajor(),
+               Version::GetMinor(), Version::GetBuild(), Version::GetPatch(),
+               Version::IsCandidate());
+    msg.WriteToLogFile();
   }
 }
 
