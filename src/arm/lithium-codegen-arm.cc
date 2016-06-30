@@ -3034,7 +3034,8 @@ MemOperand LCodeGen::PrepareKeyedOperand(Register key,
     return MemOperand(base, scratch0(), LSL, shift_size);
   } else {
     ASSERT_EQ(-1, shift_size);
-    return MemOperand(base, scratch0(), LSR, 1);
+    // key can be negative, so using ASR here.
+    return MemOperand(base, scratch0(), ASR, 1);
   }
 }
 
