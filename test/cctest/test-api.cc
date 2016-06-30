@@ -46,6 +46,18 @@
 #include "parser.h"
 #include "unicode-inl.h"
 
+#if defined(_AIX) && defined(V8_HOST_ARCH_64_BIT)
+// AIX gcc is unable to compile this file in its entirety due to the
+// following open issue:
+//   http://gcc.gnu.org/bugzilla/show_bug.cgi?id=378
+// As a workaround, the file is split into two parts: test-api.cc and
+// test-api2.cc.
+#define TEST_API_IN_PARTS
+#if !defined(TEST_API_PART2)
+#define TEST_API_PART1
+#endif
+#endif
+
 static const bool kLogThreading = false;
 
 static bool IsNaN(double x) {

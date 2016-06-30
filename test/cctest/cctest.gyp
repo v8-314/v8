@@ -118,6 +118,12 @@
             'test-disasm-arm.cc'
           ],
         }],
+        ['v8_target_arch=="ppc" or v8_target_arch=="ppc64"', {
+          'sources': [
+            'test-assembler-ppc.cc',
+            'test-disasm-ppc.cc'
+          ],
+        }],
         ['v8_target_arch=="mipsel" or v8_target_arch=="mips"', {
           'sources': [
             'test-assembler-mips.cc',
@@ -132,6 +138,11 @@
         [ 'OS=="mac"', {
           'sources': [
             'test-platform-macos.cc',
+          ],
+        }],
+        [ 'OS=="aix" and v8_target_arch=="ppc64"', {
+          'sources': [
+            'test-api2.cc',
           ],
         }],
         [ 'OS=="win"', {

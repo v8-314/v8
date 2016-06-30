@@ -697,6 +697,22 @@ void Deserializer::ReadObject(int space_number,
   bool is_codespace = (space_number == CODE_SPACE);
   ASSERT(HeapObject::FromAddress(address)->IsCode() == is_codespace);
 #endif
+#if defined(_AIX) || defined(V8_TARGET_ARCH_PPC64)
+  // If we're on a platform that uses function_descriptors
+  // these jump tables make use of RelocInfo::INTERNAL_REFERENCE.
+  // As the V8 serialization code doesn't handle that relocation type
+  // we use this hack to fix up code that has function_descriptors
+  if (space_number == CODE_SPACE) {
+    Code * code = reinterpret_cast<Code*>(HeapObject::FromAddress(address));
+    for (RelocIterator it(code); !it.done(); it.next()) {
+      RelocInfo::Mode rmode = it.rinfo()->rmode();
+      if (rmode == RelocInfo::INTERNAL_REFERENCE) {
+        uintptr_t* p = reinterpret_cast<uintptr_t*>(code->instruction_start());
+        *p = reinterpret_cast<uintptr_t>(p + 3);
+      }
+    }
+  }
+#endif
 }
 
 void Deserializer::ReadChunk(Object** current,
@@ -941,15 +957,16 @@ void Deserializer::ReadChunk(Object** current,
       // allocation point and write a pointer to it to the current object.
       ALL_SPACES(kBackref, kPlain, kStartOfObject)
       ALL_SPACES(kBackrefWithSkip, kPlain, kStartOfObject)
-#if V8_TARGET_ARCH_MIPS
+#if defined(V8_TARGET_ARCH_MIPS) || \
+    defined(V8_TARGET_ARCH_PPC) || defined(V8_TARGET_ARCH_PPC64)
       // Deserialize a new object from pointer found in code and write
-      // a pointer to it to the current object. Required only for MIPS, and
+      // a pointer to it to the current object. Required only for MIPS/PPC, and
       // omitted on the other architectures because it is fully unrolled and
       // would cause bloat.
       ALL_SPACES(kNewObject, kFromCode, kStartOfObject)
       // Find a recently deserialized code object using its offset from the
       // current allocation point and write a pointer to it to the current
-      // object. Required only for MIPS.
+      // object. Required only for MIPS/PPC.
       ALL_SPACES(kBackref, kFromCode, kStartOfObject)
       ALL_SPACES(kBackrefWithSkip, kFromCode, kStartOfObject)
 #endif
@@ -1164,12 +1181,14 @@ int Serializer::RootIndex(HeapObject* heap_object, HowToCode from) {
   for (int i = 0; i < root_index_wave_front_; i++) {
     Object* root = heap->roots_array_start()[i];
     if (!root->IsSmi() && root == heap_object) {
-#if V8_TARGET_ARCH_MIPS
+#if defined(V8_TARGET_ARCH_MIPS) || \
+    defined(V8_TARGET_ARCH_PPC) || defined(V8_TARGET_ARCH_PPC64)
       if (from == kFromCode) {
-        // In order to avoid code bloat in the deserializer we don't have
-        // support for the encoding that specifies a particular root should
-        // be written into the lui/ori instructions on MIPS.  Therefore we
-        // should not generate such serialization data for MIPS.
+        // In order to avoid code bloat in the deserializer we don't
+        // have support for the encoding that specifies a particular
+        // root should be written into the lui/ori instructions on
+        // MIPS or lis/addic on PPC.  Therefore we should not generate
+        // such serialization data for MIPS/PPC.
         return kInvalidRootIndex;
       }
 #endif

@@ -59,7 +59,7 @@ DEFS = {FAIL_OK: [FAIL, OKAY],
 # Support arches, modes to be written as keywords instead of strings.
 VARIABLES = {ALWAYS: True}
 for var in ["debug", "release", "android_arm", "android_ia32", "arm", "ia32",
-            "mipsel", "mips", "x64"]:
+            "mipsel", "mips", "x64", "ppc", "ppc64"]:
   VARIABLES[var] = var
 
 

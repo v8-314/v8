@@ -56,6 +56,11 @@
 #define V8_INFINITY HUGE_VAL
 #endif
 
+#ifdef _AIX
+#undef V8_INFINITY
+#define V8_INFINITY (__builtin_inff())
+#endif
+
 
 #include "../include/v8stdint.h"
 
@@ -86,6 +91,13 @@ namespace internal {
 #elif defined(__MIPSEL__) || defined(__MIPSEB__)
 #define V8_HOST_ARCH_MIPS 1
 #define V8_HOST_ARCH_32_BIT 1
+#elif defined(__PPC__) || defined(_ARCH_PPC)
+#define V8_HOST_ARCH_PPC 1
+#if defined(__PPC64__) || defined(_ARCH_PPC64)
+#define V8_HOST_ARCH_64_BIT 1
+#else
+#define V8_HOST_ARCH_32_BIT 1
+#endif
 #else
 #error Host architecture was not detected as supported by v8
 #endif
@@ -94,7 +106,8 @@ namespace internal {
 // in the same way as the host architecture, that is, target the native
 // environment as presented by the compiler.
 #if !defined(V8_TARGET_ARCH_X64) && !defined(V8_TARGET_ARCH_IA32) && \
-    !defined(V8_TARGET_ARCH_ARM) && !defined(V8_TARGET_ARCH_MIPS)
+    !defined(V8_TARGET_ARCH_ARM) && !defined(V8_TARGET_ARCH_MIPS) && \
+    !defined(V8_TARGET_ARCH_PPC)
 #if defined(_M_X64) || defined(__x86_64__)
 #define V8_TARGET_ARCH_X64 1
 #elif defined(_M_IX86) || defined(__i386__)
@@ -112,6 +125,10 @@ namespace internal {
 #define BIG_ENDIAN_FLOATING_POINT 1
 #endif
 
+#if __BYTE_ORDER == __BIG_ENDIAN
+#define BIG_ENDIAN_FLOATING_POINT 1
+#endif
+
 // Check for supported combinations of host and target architectures.
 #if defined(V8_TARGET_ARCH_IA32) && !defined(V8_HOST_ARCH_IA32)
 #error Target architecture ia32 is only supported on ia32 host
@@ -120,8 +137,9 @@ namespace internal {
 #error Target architecture x64 is only supported on x64 host
 #endif
 #if (defined(V8_TARGET_ARCH_ARM) && \
-    !(defined(V8_HOST_ARCH_IA32) || defined(V8_HOST_ARCH_ARM)))
-#error Target architecture arm is only supported on arm and ia32 host
+    !(defined(V8_HOST_ARCH_IA32) || defined(V8_HOST_ARCH_ARM) || \
+      defined(V8_HOST_ARCH_PPC)))
+#error Target architecture arm is only supported on arm, ppc and ia32 host
 #endif
 #if (defined(V8_TARGET_ARCH_MIPS) && \
     !(defined(V8_HOST_ARCH_IA32) || defined(V8_HOST_ARCH_MIPS)))
@@ -133,6 +151,9 @@ namespace internal {
 // the use of a simulated environment.
 #if !defined(USE_SIMULATOR)
 #if (defined(V8_TARGET_ARCH_ARM) && !defined(V8_HOST_ARCH_ARM))
+#define USE_SIMULATOR 1
+#endif
+#if (defined(V8_TARGET_ARCH_PPC) && !defined(V8_HOST_ARCH_PPC))
 #define USE_SIMULATOR 1
 #endif
 #if (defined(V8_TARGET_ARCH_MIPS) && !defined(V8_HOST_ARCH_MIPS))
@@ -193,6 +214,16 @@ typedef byte* Address;
 #define V8PRIxPTR V8_PTR_PREFIX "x"
 #define V8PRIdPTR V8_PTR_PREFIX "d"
 #define V8PRIuPTR V8_PTR_PREFIX "u"
+
+// Fix for AIX define intptr_t as "long int":
+#ifdef _AIX
+#undef V8_PTR_PREFIX
+#define V8_PTR_PREFIX "l"
+#undef V8PRIdPTR
+#define V8PRIdPTR "ld"
+#undef V8PRIxPTR
+#define V8PRIxPTR "lx"
+#endif
 
 // Fix for Mac OS X defining uintptr_t as "unsigned long":
 #if defined(__APPLE__) && defined(__MACH__)

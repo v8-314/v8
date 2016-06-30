@@ -73,6 +73,10 @@ endif
 ifeq ($(extrachecks), off)
   GYPFLAGS += -Dv8_enable_extra_checks=0
 endif
+# extrachecks=off
+ifeq ($(extrappcchecks), on)
+  GYPFLAGS += -Dv8_enable_extra_ppcchecks=1
+endif
 # gdbjit=on
 ifeq ($(gdbjit), on)
   GYPFLAGS += -Dv8_enable_gdbjit=1
@@ -115,6 +119,10 @@ endif
 ifeq ($(hardfp), on)
   GYPFLAGS += -Dv8_use_arm_eabi_hardfloat=true
 endif
+# nativesim=true
+ifeq ($(nativesim), true)
+  GYPFLAGS += -Dv8_native_sim=true
+endif
 
 # ----------------- available targets: --------------------
 # - "dependencies": pulls in external dependencies (currently: GYP)
@@ -133,8 +141,8 @@ endif
 
 # Architectures and modes to be compiled. Consider these to be internal
 # variables, don't override them (use the targets instead).
-ARCHES = ia32 x64 arm mipsel mips
-DEFAULT_ARCHES = ia32 x64 arm
+ARCHES = ia32 x64 arm ppc mipsel mips ppc64
+DEFAULT_ARCHES = ia32 x64 arm ppc ppc64
 MODES = release debug
 ANDROID_ARCHES = android_ia32 android_arm
 

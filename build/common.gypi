@@ -70,8 +70,12 @@
 
     'v8_enable_disassembler%': 0,
 
+    'v8_native_sim%': 'false',
+
     # Enable extra checks in API functions and other strategic places.
     'v8_enable_extra_checks%': 1,
+
+    'v8_enable_extra_ppcchecks%': 0,
 
     'v8_enable_gdbjit%': 0,
 
@@ -117,6 +121,9 @@
       ['v8_enable_extra_checks==1', {
         'defines': ['ENABLE_EXTRA_CHECKS',],
       }],
+      ['v8_enable_extra_ppcchecks==1', {
+        'defines': ['ENABLE_EXTRA_PPCCHECKS',],
+      }],
       ['v8_enable_gdbjit==1', {
         'defines': ['ENABLE_GDB_JIT_INTERFACE',],
       }],
@@ -128,6 +135,12 @@
       }],
       ['v8_interpreted_regexp==1', {
         'defines': ['V8_INTERPRETED_REGEXP',],
+      }],
+      ['v8_native_sim=="true"', {
+        'defines': [
+          'NATIVE_SIMULATION',
+          'USE_SIMULATOR',
+        ],
       }],
       ['v8_target_arch=="arm"', {
         'defines': [
@@ -171,6 +184,17 @@
           }],
         ],
       }],  # v8_target_arch=="arm"
+      ['v8_target_arch=="ppc"', {
+        'defines': [
+          'V8_TARGET_ARCH_PPC',
+        ],
+      }],  # v8_target_arch=="ppc"
+      ['v8_target_arch=="ppc64"', {
+        'defines': [
+          'V8_TARGET_ARCH_PPC',
+          'V8_TARGET_ARCH_PPC64',
+        ],
+      }],  # v8_target_arch=="ppc64"
       ['v8_target_arch=="ia32"', {
         'defines': [
           'V8_TARGET_ARCH_IA32',
@@ -283,7 +307,7 @@
         },
       }],
       ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris" \
-         or OS=="netbsd"', {
+         or OS=="netbsd" or OS=="aix"', {
         'conditions': [
           [ 'v8_no_strict_aliasing==1', {
             'cflags': [ '-fno-strict-aliasing' ],
@@ -296,7 +320,7 @@
       ['(OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="solaris" \
          or OS=="netbsd" or OS=="mac" or OS=="android") and \
         (v8_target_arch=="arm" or v8_target_arch=="ia32" or \
-         v8_target_arch=="mipsel" or v8_target_arch=="mips")', {
+         v8_target_arch=="mipsel" or v8_target_arch=="mips" or v8_target_arch=="ppc")', {
         # Check whether the host compiler and target compiler support the
         # '-m32' option and set it if so.
         'target_conditions': [
@@ -333,6 +357,20 @@
       ['OS=="netbsd"', {
         'cflags': [ '-I/usr/pkg/include' ],
       }],
+      ['OS=="aix"', {
+        # AIX is missing /usr/include/endian.h
+        'defines': [
+          '__LITTLE_ENDIAN=1234',
+          '__BIG_ENDIAN=4321',
+          '__BYTE_ORDER=__BIG_ENDIAN',
+          '__FLOAT_WORD_ORDER=__BIG_ENDIAN'],
+        'conditions': [
+          [ 'v8_target_arch=="ppc64"', {
+            'cflags': [ '-maix64' ],
+            'ldflags': [ '-maix64' ],
+          }],
+        ],
+      }],
     ],  # conditions
     'configurations': {
       'Debug': {
@@ -360,9 +398,13 @@
           },
         },
         'conditions': [
-          ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="netbsd"', {
+          ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="netbsd" \
+            or OS=="aix"', {
             'cflags': [ '-Wall', '<(werror)', '-W', '-Wno-unused-parameter',
                         '-Wnon-virtual-dtor', '-Woverloaded-virtual' ],
+          }],
+          ['OS=="aix"', {
+            'ldflags': [ '-Wl,-bbigtoc' ],
           }],
           ['OS=="android"', {
             'variables': {
@@ -383,7 +425,7 @@
       'Release': {
         'conditions': [
           ['OS=="linux" or OS=="freebsd" or OS=="openbsd" or OS=="netbsd" \
-            or OS=="android"', {
+            or OS=="android" or OS=="aix"', {
             'cflags!': [
               '-O2',
               '-Os',

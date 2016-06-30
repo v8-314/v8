@@ -113,6 +113,24 @@ void generate(MacroAssembler* masm, i::Vector<const char> string) {
   __ pop(kRootRegister);
   __ jr(ra);
   __ nop();
+#elif V8_TARGET_ARCH_PPC
+#if ABI_USES_FUNCTION_DESCRIPTORS
+  __ function_descriptor();
+#endif
+
+  __ push(kRootRegister);
+  __ InitializeRootRegister();
+
+  __ li(r3, Operand::Zero());
+  __ li(ip, Operand(string.at(0)));
+  StringHelper::GenerateHashInit(masm, r3, ip, r0);
+  for (int i = 1; i < string.length(); i++) {
+    __ li(ip, Operand(string.at(i)));
+    StringHelper::GenerateHashAddCharacter(masm, r3, ip, r0);
+  }
+  StringHelper::GenerateHashGetHash(masm, r3, r0);
+  __ pop(kRootRegister);
+  __ blr();
 #endif
 }
 
@@ -148,6 +166,16 @@ void generate(MacroAssembler* masm, uint32_t key) {
   __ pop(kRootRegister);
   __ jr(ra);
   __ nop();
+#elif V8_TARGET_ARCH_PPC
+#if ABI_USES_FUNCTION_DESCRIPTORS
+  __ function_descriptor();
+#endif
+  __ push(kRootRegister);
+  __ InitializeRootRegister();
+  __ li(r3, Operand(key));
+  __ GetNumberHash(r3, ip);
+  __ pop(kRootRegister);
+  __ blr();
 #endif
 }
 
@@ -172,7 +200,7 @@ void check(i::Vector<const char> string) {
   v8_string->set_hash_field(String::kEmptyHashField);
 #ifdef USE_SIMULATOR
   uint32_t codegen_hash =
-      reinterpret_cast<uint32_t>(CALL_GENERATED_CODE(hash, 0, 0, 0, 0, 0));
+      reinterpret_cast<uintptr_t>(CALL_GENERATED_CODE(hash, 0, 0, 0, 0, 0));
 #else
   uint32_t codegen_hash = hash();
 #endif
@@ -199,7 +227,7 @@ void check(uint32_t key) {
   HASH_FUNCTION hash = FUNCTION_CAST<HASH_FUNCTION>(code->entry());
 #ifdef USE_SIMULATOR
   uint32_t codegen_hash =
-      reinterpret_cast<uint32_t>(CALL_GENERATED_CODE(hash, 0, 0, 0, 0, 0));
+      reinterpret_cast<uintptr_t>(CALL_GENERATED_CODE(hash, 0, 0, 0, 0, 0));
 #else
   uint32_t codegen_hash = hash();
 #endif

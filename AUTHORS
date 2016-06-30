@@ -7,6 +7,7 @@ Google Inc.
 Sigma Designs Inc.
 ARM Ltd.
 Hewlett-Packard Development Company, LP
+IBM Corporation
 Igalia, S.L.
 Joyent, Inc.
 
@@ -15,11 +16,13 @@ Alexander Botero-Lowry <alexbl@FreeBSD.org>
 Alexander Karpinsky <homm86@gmail.com>
 Alexandre Vassalotti <avassalotti@gmail.com>
 Andreas Anyuru <andreas.anyuru@gmail.com>
+Andrew Low <andrew_low@ca.ibm.com>
 Bert Belder <bertbelder@gmail.com>
 Burcu Dogan <burcujdogan@gmail.com>
 Craig Schlenter <craig.schlenter@gmail.com>
 Daniel Andersson <kodandersson@gmail.com>
 Daniel James <dnljms@gmail.com>
+David Eelsohn <dje.gcc@gmail.com>
 Derek J Conrod <dconrod@codeaurora.org>
 Dineel D Sule <dsule@codeaurora.org>
 Erich Ocean <erich.ocean@me.com>
@@ -37,6 +40,7 @@ Kun Zhang <zhangk@codeaurora.org>
 Martyn Capewell <martyn.capewell@arm.com>
 Mathias Bynens <mathias@qiwi.be>
 Matt Hanselman <mjhanselman@gmail.com>
+Matthew Brandyberry <mbrandy@us.ibm.com>
 Maxim Mossienko <maxim.mossienko@gmail.com>
 Michael Lutz <michi@icosahedron.de>
 Michael Smith <mike@w3.org>

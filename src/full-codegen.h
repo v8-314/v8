@@ -125,6 +125,8 @@ class FullCodeGenerator: public AstVisitor {
   static const int kBackEdgeDistanceUnit = 162;
 #elif V8_TARGET_ARCH_ARM
   static const int kBackEdgeDistanceUnit = 142;
+#elif V8_TARGET_ARCH_PPC
+  static const int kBackEdgeDistanceUnit = 142;
 #elif V8_TARGET_ARCH_MIPS
   static const int kBackEdgeDistanceUnit = 142;
 #else
@@ -333,12 +335,18 @@ class FullCodeGenerator: public AstVisitor {
              Label* if_true,
              Label* if_false,
              Label* fall_through);
-#else  // All non-mips arch.
+#elif defined(V8_TARGET_ARCH_PPC) || defined(V8_TARGET_ARCH_PPC64)
+  void Split(Condition cc,
+             Label* if_true,
+             Label* if_false,
+             Label* fall_through,
+             CRegister cr = cr7);
+#else  // All other arch.
   void Split(Condition cc,
              Label* if_true,
              Label* if_false,
              Label* fall_through);
-#endif  // V8_TARGET_ARCH_MIPS
+#endif
 
   // Load the value of a known (PARAMETER, LOCAL, or CONTEXT) variable into
   // a register.  Emits a context chain walk if if necessary (so does

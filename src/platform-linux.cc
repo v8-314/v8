@@ -291,6 +291,8 @@ int OS::ActivationFrameAlignment() {
   return 8;
 #elif V8_TARGET_ARCH_MIPS
   return 8;
+#elif V8_TARGET_ARCH_PPC
+  return 8;
 #endif
   // With gcc 4.4 the tree vectorization optimizer can generate code
   // that requires 16 byte alignment such as movdqa on x86.
@@ -300,6 +302,7 @@ int OS::ActivationFrameAlignment() {
 
 void OS::ReleaseStore(volatile AtomicWord* ptr, AtomicWord value) {
 #if (defined(V8_TARGET_ARCH_ARM) && defined(__arm__)) || \
+    (defined(V8_TARGET_ARCH_PPC) && defined(__PPC__)) || \
     (defined(V8_TARGET_ARCH_MIPS) && defined(__mips__))
   // Only use on ARM or MIPS hardware.
   MemoryBarrier();
@@ -409,6 +412,9 @@ void OS::DebugBreak() {
 # endif
 #elif defined(__mips__)
   asm("break");
+#elif defined(__PPC__)
+  asm("twge 2,2");
+//  asm("nop");  // roohack - nothing for now;
 #else
   asm("int $3");
 #endif
@@ -1034,7 +1040,9 @@ static void ProfilerSignalHandler(int signal, siginfo_t* info, void* context) {
 
   // Extracting the sample from the context is extremely machine dependent.
   ucontext_t* ucontext = reinterpret_cast<ucontext_t*>(context);
+#ifndef V8_HOST_ARCH_PPC
   mcontext_t& mcontext = ucontext->uc_mcontext;
+#endif
   sample->state = isolate->current_vm_state();
 #if V8_HOST_ARCH_IA32
   sample->pc = reinterpret_cast<Address>(mcontext.gregs[REG_EIP]);
@@ -1062,6 +1070,12 @@ static void ProfilerSignalHandler(int signal, siginfo_t* info, void* context) {
   sample->pc = reinterpret_cast<Address>(mcontext.pc);
   sample->sp = reinterpret_cast<Address>(mcontext.gregs[29]);
   sample->fp = reinterpret_cast<Address>(mcontext.gregs[30]);
+#elif V8_HOST_ARCH_PPC
+  sample->pc = reinterpret_cast<Address>(ucontext->uc_mcontext.regs->nip);
+  sample->sp =
+    reinterpret_cast<Address>(ucontext->uc_mcontext.regs->gpr[PT_R1]);
+  sample->fp =
+    reinterpret_cast<Address>(ucontext->uc_mcontext.regs->gpr[PT_R31]);
 #endif  // V8_HOST_ARCH_*
   sampler->SampleStack(sample);
   sampler->Tick(sample);

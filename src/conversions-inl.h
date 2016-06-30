@@ -78,7 +78,7 @@ inline unsigned int FastD2UI(double x) {
 #ifndef BIG_ENDIAN_FLOATING_POINT
     Address mantissa_ptr = reinterpret_cast<Address>(&x);
 #else
-    Address mantissa_ptr = reinterpret_cast<Address>(&x) + 4;
+    Address mantissa_ptr = reinterpret_cast<Address>(&x) + kIntSize;
 #endif
     // Copy least significant 32 bits of mantissa.
     memcpy(&result, mantissa_ptr, sizeof(result));

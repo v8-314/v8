@@ -53,6 +53,10 @@
 #include <android/log.h>
 #endif
 
+#if defined(_AIX)
+#include <fenv.h>
+#endif
+
 #include "v8.h"
 
 #include "codegen.h"
@@ -112,8 +116,14 @@ void* OS::GetRandomMmapAddr() {
     // The range 0x20000000 - 0x60000000 is relatively unpopulated across a
     // variety of ASLR modes (PAE kernel, NX compat mode, etc) and on macos
     // 10.6 and 10.7.
+    // The range 0x30000000 - 0xD0000000 is available on AIX;
+    // choose the upper range.
     raw_addr &= 0x3ffff000;
+#ifdef _AIX
+    raw_addr += 0x90000000;
+#else
     raw_addr += 0x20000000;
+#endif
 #endif
     return reinterpret_cast<void*>(raw_addr);
   }
@@ -125,7 +135,17 @@ void* OS::GetRandomMmapAddr() {
 // Math functions
 
 double modulo(double x, double y) {
+#if defined(_AIX)
+  // AIX raises an underflow exception for (Number.MIN_VALUE % Number.MAX_VALUE)
+  double result;
+  int exception;
+  feclearexcept(FE_ALL_EXCEPT);
+  result = fmod(x, y);
+  exception = fetestexcept(FE_UNDERFLOW);
+  return (exception ? x : result);
+#else
   return fmod(x, y);
+#endif
 }
 
 
@@ -146,6 +166,11 @@ UNARY_MATH_FUNCTION(sqrt, CreateSqrtFunction())
 
 #undef MATH_FUNCTION
 
+
+#ifdef _AIX
+#undef NAN
+#define NAN (__builtin_nanf(""))
+#endif
 
 double OS::nan_value() {
   // NAN from math.h is defined in C99 and not in POSIX.

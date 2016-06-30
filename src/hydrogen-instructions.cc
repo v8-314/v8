@@ -36,6 +36,8 @@
 #include "x64/lithium-x64.h"
 #elif V8_TARGET_ARCH_ARM
 #include "arm/lithium-arm.h"
+#elif V8_TARGET_ARCH_PPC
+#include "ppc/lithium-ppc.h"
 #elif V8_TARGET_ARCH_MIPS
 #include "mips/lithium-mips.h"
 #else
@@ -966,8 +968,8 @@ HValue* HUnaryMathOperation::Canonicalize() {
     // introduced.
     if (value()->representation().IsInteger32()) return value();
 
-#if defined(V8_TARGET_ARCH_ARM) || defined(V8_TARGET_ARCH_IA32) || \
-        defined(V8_TARGET_ARCH_X64)
+#if defined(V8_TARGET_ARCH_ARM) || defined(V8_TARGET_ARCH_IA32) ||      \
+  defined(V8_TARGET_ARCH_X64) || defined(V8_TARGET_ARCH_PPC)
     if (value()->IsDiv() && (value()->UseCount() == 1)) {
       // TODO(2038): Implement this optimization for non ARM architectures.
       HDiv* hdiv = HDiv::cast(value());

@@ -37,6 +37,8 @@
 #include "unicode-inl.h"
 #if V8_TARGET_ARCH_ARM
 #include "arm/constants-arm.h"
+#elif V8_TARGET_ARCH_PPC
+#include "ppc/constants-ppc.h"
 #elif V8_TARGET_ARCH_MIPS
 #include "mips/constants-mips.h"
 #endif
@@ -5852,10 +5854,11 @@ class SharedFunctionInfo: public HeapObject {
   // garbage collections.
   // To avoid wasting space on 64-bit architectures we use
   // the following trick: we group integer fields into pairs
-  // First integer in each pair is shifted left by 1.
+  // The least significant integer in each pair is shifted left by 1.
   // By doing this we guarantee that LSB of each kPointerSize aligned
   // word is not set and thus this word cannot be treated as pointer
   // to HeapObject during old space traversal.
+#if __BYTE_ORDER == __LITTLE_ENDIAN
   static const int kLengthOffset =
       kAstNodeCountOffset + kPointerSize;
   static const int kFormalParameterCountOffset =
@@ -5883,6 +5886,38 @@ class SharedFunctionInfo: public HeapObject {
 
   static const int kCountersOffset = kOptCountOffset + kIntSize;
   static const int kStressDeoptCounterOffset = kCountersOffset + kIntSize;
+#elif __BYTE_ORDER == __BIG_ENDIAN
+  static const int kFormalParameterCountOffset =
+      kAstNodeCountOffset + kPointerSize;
+  static const int kLengthOffset =
+      kFormalParameterCountOffset + kIntSize;
+
+  static const int kNumLiteralsOffset =
+      kLengthOffset + kIntSize;
+  static const int kExpectedNofPropertiesOffset =
+      kNumLiteralsOffset + kIntSize;
+
+  static const int kStartPositionAndTypeOffset =
+      kExpectedNofPropertiesOffset + kIntSize;
+  static const int kEndPositionOffset =
+      kStartPositionAndTypeOffset + kIntSize;
+
+  static const int kCompilerHintsOffset =
+      kEndPositionOffset + kIntSize;
+  static const int kFunctionTokenPositionOffset =
+      kCompilerHintsOffset + kIntSize;
+
+  static const int kOptCountOffset =
+      kFunctionTokenPositionOffset + kIntSize;
+  static const int kThisPropertyAssignmentsCountOffset =
+      kOptCountOffset + kIntSize;
+
+  static const int kStressDeoptCounterOffset =
+      kThisPropertyAssignmentsCountOffset + kIntSize;
+  static const int kCountersOffset = kStressDeoptCounterOffset + kIntSize;
+#else
+#error Unknown byte ordering
+#endif
 
   // Total size.
   static const int kSize = kStressDeoptCounterOffset + kIntSize;
@@ -7322,8 +7357,13 @@ class String: public HeapObject {
 
   // Layout description.
   static const int kLengthOffset = HeapObject::kHeaderSize;
-  static const int kHashFieldOffset = kLengthOffset + kPointerSize;
-  static const int kSize = kHashFieldOffset + kPointerSize;
+  static const int kHashFieldSlot = kLengthOffset + kPointerSize;
+#if __BYTE_ORDER == __LITTLE_ENDIAN || !V8_HOST_ARCH_64_BIT
+  static const int kHashFieldOffset = kHashFieldSlot;
+#else
+  static const int kHashFieldOffset = kHashFieldSlot + kIntSize;
+#endif
+  static const int kSize = kHashFieldSlot + kPointerSize;
 
   // Maximum number of characters to consider when trying to convert a string
   // value into an array index.
