@@ -42,7 +42,7 @@ const int Deoptimizer::table_entry_size_ = 20;
 
 
 int Deoptimizer::patch_size() {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   const int kCallInstructionSizeInWords = 7;
 #else
   const int kCallInstructionSizeInWords = 4;
@@ -121,7 +121,7 @@ void Deoptimizer::DeoptimizeFunction(JSFunction* function) {
 }
 
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
 static const int32_t kBranchBeforeStackCheck = 0x409c0020;
 static const int32_t kBranchBeforeInterrupt =  0x409c0044;
 #else
@@ -154,7 +154,7 @@ void Deoptimizer::PatchStackCheckCodeAt(Code* unoptimized_code,
   ASSERT(Memory::int32_at(pc_after - 2 * kInstrSize) == 0x7d8803a6);
   ASSERT(Memory::int32_at(pc_after - kInstrSize) == 0x4e800021);
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ASSERT(Assembler::Is64BitLoadIntoR12(
       Assembler::instr_at(pc_after - 7 * kInstrSize),
       Assembler::instr_at(pc_after - 6 * kInstrSize),
@@ -188,7 +188,7 @@ void Deoptimizer::PatchStackCheckCodeAt(Code* unoptimized_code,
   // 7d8803a6       mtlr    r12
   // 4e800021       blrl
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   CodePatcher patcher(pc_after - 8 * kInstrSize, 6);
 
   // Assemble the 64 bit value from the five part load and verify
@@ -222,7 +222,7 @@ void Deoptimizer::PatchStackCheckCodeAt(Code* unoptimized_code,
   patcher.masm()->mov(ip,
     Operand(reinterpret_cast<uintptr_t>(replacement_code->entry())));
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   unoptimized_code->GetHeap()->incremental_marking()->RecordCodeTargetPatch(
       unoptimized_code, pc_after - 7 * kInstrSize, replacement_code);
 #else
@@ -242,7 +242,7 @@ void Deoptimizer::RevertStackCheckCodeAt(Code* unoptimized_code,
   ASSERT(Memory::int32_at(pc_after - 2 * kInstrSize) == 0x7d8803a6);
   ASSERT(Memory::int32_at(pc_after - kInstrSize) == 0x4e800021);
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ASSERT(Assembler::Is64BitLoadIntoR12(
       Assembler::instr_at(pc_after - 7 * kInstrSize),
       Assembler::instr_at(pc_after - 6 * kInstrSize),
@@ -255,7 +255,7 @@ void Deoptimizer::RevertStackCheckCodeAt(Code* unoptimized_code,
       Assembler::instr_at(pc_after - 3 * kInstrSize)));
 #endif
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   // Replace NOP with conditional jump.
   CodePatcher patcher(pc_after - 8 * kInstrSize, 6);
   if (FLAG_count_based_interrupts) {
@@ -285,7 +285,7 @@ void Deoptimizer::RevertStackCheckCodeAt(Code* unoptimized_code,
   }
 #endif
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   // Assemble the 64 bit value from the five part load and verify
   // that it is the stack guard code
   uint64_t stack_check_address =
@@ -313,7 +313,7 @@ void Deoptimizer::RevertStackCheckCodeAt(Code* unoptimized_code,
   patcher.masm()->mov(ip,
     Operand(reinterpret_cast<uintptr_t>(check_code->entry())));
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   check_code->GetHeap()->incremental_marking()->RecordCodeTargetPatch(
       unoptimized_code, pc_after - 7 * kInstrSize, check_code);
 #else

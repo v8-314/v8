@@ -143,6 +143,12 @@ LIBRARY_FLAGS = {
       'CCFLAGS':      ['-m32'],
       'LINKFLAGS':    ['-m32']
     },
+    'arch:ppc': {
+      'CPPDEFINES':   ['V8_TARGET_ARCH_PPC'],
+    },
+    'arch:ppc64': {
+      'CPPDEFINES':   ['V8_TARGET_ARCH_PPC64', 'V8_TARGET_ARCH_PPC'],
+    },
     'arch:arm': {
       'CPPDEFINES':   ['V8_TARGET_ARCH_ARM'],
       'unalignedaccesses:on' : {
@@ -994,7 +1000,7 @@ def GuessStrictAliasing(env):
 
 PLATFORM_OPTIONS = {
   'arch': {
-    'values': ['arm', 'ia32', 'x64', 'mips'],
+    'values': ['arm', 'ia32', 'x64', 'mips', 'ppc64', 'ppc'],
     'guess': GuessArch,
     'help': 'the architecture to build for'
   },

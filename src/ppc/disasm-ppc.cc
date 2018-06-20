@@ -346,7 +346,7 @@ int Decoder::FormatOption(Instruction* instr, const char* format) {
        return 2;
      }
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case 'd': {  // ds value for offset
       int32_t value = SIGN_EXT_IMM16(instr->Bits(15, 0) & ~3);
       out_buffer_pos_ += OS::SNPrintF(out_buffer_ + out_buffer_pos_,
@@ -565,7 +565,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "srw'.    'ra, 'rs, 'rb");
       return;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case SRDX: {
       Format(instr, "srd'.    'ra, 'rs, 'rb");
       return;
@@ -575,7 +575,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "sraw'.   'ra, 'rs, 'rb");
       return;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case SRAD: {
       Format(instr, "srad'.   'ra, 'rs, 'rb");
       return;
@@ -589,7 +589,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "extsh'.  'ra, 'rs");
       return;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case EXTSW: {
       Format(instr, "extsw'.  'ra, 'rs");
       return;
@@ -650,7 +650,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "slw'.   'ra, 'rs, 'rb");
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case SLDX: {
       Format(instr, "sld'.   'ra, 'rs, 'rb");
       break;
@@ -668,7 +668,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "cntlzw'. 'ra, 'rs");
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case CNTLZDX: {
       Format(instr, "cntlzd'. 'ra, 'rs");
       break;
@@ -710,7 +710,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "mullw'o'.  'rt, 'ra, 'rb");
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case MULLD: {
       Format(instr, "mulld'o'.  'rt, 'ra, 'rb");
       break;
@@ -720,7 +720,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "divw'o'.   'rt, 'ra, 'rb");
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case DIVD: {
       Format(instr, "divd'o'.   'rt, 'ra, 'rb");
       break;
@@ -814,7 +814,7 @@ void Decoder::DecodeExt2(Instruction* instr) {
       Format(instr, "lhzux   'rt, 'ra, 'rb");
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case LDX: {
       Format(instr, "ldx     'rt, 'ra, 'rb");
       break;
@@ -1210,7 +1210,7 @@ int Decoder::InstructionDecode(byte* instr_ptr) {
       DecodeExt5(instr);
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case LD: {
       switch (instr->Bits(1, 0)) {
         case 0:

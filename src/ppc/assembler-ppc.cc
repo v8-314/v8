@@ -72,7 +72,7 @@ static bool is_processor(const char* p) {
 
     read_tried = true;
     if (fd != -1) {
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
       static Elf64_auxv_t buffer[16];
       Elf64_auxv_t *auxv_element;
 #else
@@ -359,7 +359,7 @@ Register Assembler::GetRB(Instr instr) {
   return reg;
 }
 
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
 // This code assumes a FIXED_SEQUENCE for 64bit loads (lis/ori)
 bool Assembler::Is64BitLoadIntoR12(Instr instr1, Instr instr2,
                              Instr instr3, Instr instr4, Instr instr5) {
@@ -392,7 +392,7 @@ bool Assembler::IsRlwinm(Instr instr) {
   return ((instr & kOpcodeMask) == RLWINMX);
 }
 
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
 bool Assembler::IsRldicl(Instr instr) {
   return (((instr & kOpcodeMask) == EXT5) &&
           ((instr & kExt5OpcodeMask) == RLDICL));
@@ -903,7 +903,7 @@ void Assembler::orx(Register dst, Register src1, Register src2, RCBit rc) {
 
 void Assembler::cmpi(Register src1, const Operand& src2, CRegister cr) {
   intptr_t imm16 = src2.imm_;
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
   int L = 1;
 #else
   int L = 0;
@@ -916,7 +916,7 @@ void Assembler::cmpi(Register src1, const Operand& src2, CRegister cr) {
 
 void Assembler::cmpli(Register src1, const Operand& src2, CRegister cr) {
   uintptr_t uimm16 = src2.imm_;
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
   int L = 1;
 #else
   int L = 0;
@@ -928,7 +928,7 @@ void Assembler::cmpli(Register src1, const Operand& src2, CRegister cr) {
 }
 
 void Assembler::cmp(Register src1, Register src2, CRegister cr) {
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
   int L = 1;
 #else
   int L = 0;
@@ -939,7 +939,7 @@ void Assembler::cmp(Register src1, Register src2, CRegister cr) {
 }
 
 void Assembler::cmpl(Register src1, Register src2, CRegister cr) {
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
   int L = 1;
 #else
   int L = 0;
@@ -1027,7 +1027,7 @@ void Assembler::lwzux(Register rt, const MemOperand & src) {
 }
 
 void Assembler::lwa(Register dst, const MemOperand &src) {
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
   int offset = src.offset();
   ASSERT(!src.ra_.is(r0));
   ASSERT(!(offset & 3) && is_int16(offset));
@@ -1116,7 +1116,7 @@ void Assembler::andc(Register dst, Register src1, Register src2, RCBit rc) {
   x_form(EXT2 | ANDCX, dst, src1, src2, rc);
 }
 
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
 // 64bit specific instructions
 void Assembler::ld(Register rd, const MemOperand &src) {
   int offset = src.offset();
@@ -1273,7 +1273,7 @@ void Assembler::marker_asm(int mcode) {
 // TOC and static chain are ignored and set to 0.
 void Assembler::function_descriptor() {
   RecordRelocInfo(RelocInfo::INTERNAL_REFERENCE);
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
   uint64_t value = reinterpret_cast<uint64_t>(pc_) + 3 * kPointerSize;
 #if __BYTE_ORDER == __LITTLE_ENDIAN
   emit(static_cast<uint32_t>(value & 0xFFFFFFFF));
@@ -1307,7 +1307,7 @@ void Assembler::mov(Register dst, const Operand& src) {
     RecordRelocInfo(src.rmode_, src.imm_);
   }
 
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
   int64_t value = src.immediate();
   int32_t hi_32 = static_cast<int64_t>(value) >> 32;
   int32_t lo_32 = static_cast<int32_t>(value);
@@ -1394,7 +1394,7 @@ void Assembler::info(const char* msg, Condition cond, int32_t code,
                      CRegister cr) {
   if (::v8::internal::FLAG_trace_sim_stubs) {
     emit(0x7d9ff808);
-#if V8_TARGET_ARCH_PPC64
+#if defined(V8_TARGET_ARCH_PPC64)
     uint64_t value = reinterpret_cast<uint64_t>(msg);
     emit(static_cast<uint32_t>(value >> 32));
     emit(static_cast<uint32_t>(value & 0xFFFFFFFF));
@@ -1759,7 +1759,7 @@ void Assembler::GrowBuffer() {
   // buffer nor pc absolute pointing inside the code buffer, so there is no need
   // to relocate any emitted relocation entries.
 
-#if ABI_USES_FUNCTION_DESCRIPTORS
+#if defined(ABI_USES_FUNCTION_DESCRIPTORS)
   // Relocate runtime entries.
   for (RelocIterator it(desc); !it.done(); it.next()) {
     RelocInfo::Mode rmode = it.rinfo()->rmode();

@@ -451,7 +451,7 @@ void FullCodeGenerator::EmitReturnSequence() {
       masm_->mtlr(r0);
       masm_->Add(sp, sp, (uint32_t)(sp_delta + (2 * kPointerSize)), r0);
       masm_->blr();
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       // With 64bit we need a couple of nop() instructions to ensure we have
       // enough space to SetDebugBreakAtReturn()
       masm_->nop();
@@ -1974,7 +1974,7 @@ void FullCodeGenerator::EmitInlineSmiBinaryOp(BinaryOperation* expr,
     case Token::SHL: {
       __ b(&stub_call);
       __ GetLeastBitsFromSmi(scratch2, right, 5);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       __ ShiftLeft(right, left, scratch2);
 #else
       __ SmiUntag(scratch1, left);
@@ -2025,7 +2025,7 @@ void FullCodeGenerator::EmitInlineSmiBinaryOp(BinaryOperation* expr,
     }
     case Token::MUL: {
       Label mul_zero;
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       // Remove tag from both operands.
       __ SmiUntag(ip, right);
       __ SmiUntag(r0, left);
@@ -2046,7 +2046,7 @@ void FullCodeGenerator::EmitInlineSmiBinaryOp(BinaryOperation* expr,
       // Go slow on zero result to handle -0.
       __ cmpi(scratch1, Operand::Zero());
       __ beq(&mul_zero);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       __ SmiTag(right, scratch1);
 #else
       __ mr(right, scratch1);
@@ -3695,7 +3695,7 @@ void FullCodeGenerator::EmitFastAsciiArrayJoin(CallRuntime* expr) {
   // string_length to get the length of the result string.
   __ LoadP(scratch1, FieldMemOperand(separator, SeqAsciiString::kLengthOffset));
   __ sub(string_length, string_length, scratch1);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ SmiUntag(scratch1, scratch1);
   __ Mul(scratch2, array_length, scratch1);
   // Check for smi overflow. No overflow if higher 33 bits of 64-bit result are

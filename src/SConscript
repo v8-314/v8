@@ -204,6 +204,46 @@ SOURCES = {
     ia32/regexp-macro-assembler-ia32.cc
     ia32/stub-cache-ia32.cc
     """),
+  'arch:ppc': Split("""
+    ppc/assembler-ppc.cc
+    ppc/builtins-ppc.cc
+    ppc/code-stubs-ppc.cc
+    ppc/codegen-ppc.cc
+    ppc/constants-ppc.cc
+    ppc/cpu-ppc.cc
+    ppc/debug-ppc.cc
+    ppc/deoptimizer-ppc.cc
+    ppc/disasm-ppc.cc
+    ppc/frames-ppc.cc
+    ppc/full-codegen-ppc.cc
+    ppc/ic-ppc.cc
+    ppc/lithium-codegen-ppc.cc
+    ppc/lithium-gap-resolver-ppc.cc
+    ppc/lithium-ppc.cc
+    ppc/macro-assembler-ppc.cc
+    ppc/regexp-macro-assembler-ppc.cc
+    ppc/stub-cache-ppc.cc
+    """),
+  'arch:ppc64': Split("""
+    ppc/assembler-ppc.cc
+    ppc/builtins-ppc.cc
+    ppc/code-stubs-ppc.cc
+    ppc/codegen-ppc.cc
+    ppc/constants-ppc.cc
+    ppc/cpu-ppc.cc
+    ppc/debug-ppc.cc
+    ppc/deoptimizer-ppc.cc
+    ppc/disasm-ppc.cc
+    ppc/frames-ppc.cc
+    ppc/full-codegen-ppc.cc
+    ppc/ic-ppc.cc
+    ppc/lithium-codegen-ppc.cc
+    ppc/lithium-gap-resolver-ppc.cc
+    ppc/lithium-ppc.cc
+    ppc/macro-assembler-ppc.cc
+    ppc/regexp-macro-assembler-ppc.cc
+    ppc/stub-cache-ppc.cc
+    """),
   'arch:x64': Split("""
     x64/assembler-x64.cc
     x64/builtins-x64.cc
@@ -225,6 +265,8 @@ SOURCES = {
     """),
   'simulator:arm': ['arm/simulator-arm.cc'],
   'simulator:mips': ['mips/simulator-mips.cc'],
+  'simulator:ppc': ['ppc/simulator-ppc.cc'],
+  'simulator:ppc64': ['ppc/simulator-ppc.cc'],
   'os:freebsd': ['platform-freebsd.cc', 'platform-posix.cc'],
   'os:openbsd': ['platform-openbsd.cc', 'platform-posix.cc'],
   'os:linux':   ['platform-linux.cc', 'platform-posix.cc'],

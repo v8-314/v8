@@ -280,7 +280,7 @@ void LGapResolver::EmitMove(int index) {
       if (in_cycle_) {
         // kSavedDoubleValueRegister was used to break the cycle,
         // but kSavedValueRegister is free.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
         __ ld(kSavedValueRegister, source_operand);
         __ std(kSavedValueRegister, destination_operand);
 #else

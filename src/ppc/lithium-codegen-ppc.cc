@@ -922,7 +922,7 @@ void LCodeGen::DoModI(LModI* instr) {
         DeoptimizeIf(eq, instr->environment());
     }
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     __ extsw(scratch, scratch);
 #endif
     __ Mul(scratch, divisor, scratch);
@@ -973,7 +973,7 @@ void LCodeGen::DoDivI(LDivI* instr) {
     __ bind(&left_not_min_int);
   }
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ extsw(result, result);
 #endif
 
@@ -1049,7 +1049,7 @@ void LCodeGen::DoMathFloorOfDiv(LMathFloorOfDiv* instr) {
     // The multiplier is a uint32.
     ASSERT(multiplier > 0 &&
            multiplier < (static_cast<int64_t>(1) << 32));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     __ extsw(scratch, dividend);
     if (divisor < 0 &&
         instr->hydrogen()->CheckFlag(HValue::kBailoutOnMinusZero)) {
@@ -1175,7 +1175,7 @@ void LCodeGen::DoMulI(LMulI* instr) {
 
     if (can_overflow) {
       // scratch:result = left * right.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       __ Mul(result, left, right);
       __ TestIfInt32(result, scratch, r0);
       DeoptimizeIf(ne, instr->environment());
@@ -1269,14 +1269,14 @@ void LCodeGen::DoShiftI(LShiftI* instr) {
     switch (instr->op()) {
       case Token::SAR:
         __ sraw(result, left, scratch);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
         __ extsw(result, result);
 #endif
         break;
       case Token::SHR:
         if (instr->can_deopt()) {
           __ srw(result, left, scratch, SetRC);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
           __ extsw(result, result, SetRC);
 #endif
           DeoptimizeIf(lt, instr->environment(), cr0);
@@ -1286,7 +1286,7 @@ void LCodeGen::DoShiftI(LShiftI* instr) {
         break;
       case Token::SHL:
         __ slw(result, left, scratch);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
         __ extsw(result, result);
 #endif
         break;
@@ -1302,7 +1302,7 @@ void LCodeGen::DoShiftI(LShiftI* instr) {
       case Token::SAR:
         if (shift_count != 0) {
           __ srawi(result, left, shift_count);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
           __ extsw(result, result);
 #endif
         } else {
@@ -1323,7 +1323,7 @@ void LCodeGen::DoShiftI(LShiftI* instr) {
       case Token::SHL:
         if (shift_count != 0) {
           __ slwi(result, left, Operand(shift_count));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
           __ extsw(result, result);
 #endif
         } else {
@@ -1360,7 +1360,7 @@ void LCodeGen::DoSubI(LSubI* instr) {
                               right_reg,
                               scratch0(), r0);
     // Doptimize on overflow
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     __ extsw(scratch0(), scratch0(), SetRC);
 #endif
     DeoptimizeIf(lt, instr->environment(), cr0);
@@ -1530,7 +1530,7 @@ void LCodeGen::DoAddI(LAddI* instr) {
                               ToRegister(left),
                               right_reg,
                               scratch0(), r0);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     __ extsw(scratch0(), scratch0(), SetRC);
 #endif
     // Doptimize on overflow
@@ -2359,7 +2359,7 @@ void LCodeGen::DoDeferredInstanceOfKnownGlobal(LInstanceOfKnownGlobal* instr,
   Register temp = ToRegister(instr->temp());
   ASSERT(temp.is(r7));
   __ LoadHeapObject(InstanceofStub::right(), instr->function());
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   static const int kAdditionalDelta = 13;
 #else
   static const int kAdditionalDelta = 7;
@@ -2887,7 +2887,7 @@ MemOperand LCodeGen::PrepareKeyedOperand(Register key,
 
   if (additional_index) {
     if (key_is_tagged) {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       // more efficient to just untag
       __ SmiUntag(scratch, key);
       key_is_tagged = false;
@@ -2988,7 +2988,7 @@ void LCodeGen::DoLoadKeyedSpecializedArrayElement(
         } else {
           __ lwzx(result, mem_operand);
         }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
         __ extsw(result, result);
 #endif
         break;
@@ -3096,7 +3096,7 @@ void LCodeGen::DoWrapReceiver(LWrapReceiver* instr) {
   __ lwz(scratch,
          FieldMemOperand(scratch, SharedFunctionInfo::kCompilerHintsOffset));
   __ TestBit(scratch,
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
              SharedFunctionInfo::kStrictModeFunction,
 #else
              SharedFunctionInfo::kStrictModeFunction + kSmiTagSize,
@@ -3106,7 +3106,7 @@ void LCodeGen::DoWrapReceiver(LWrapReceiver* instr) {
 
   // Do not transform the receiver to object for builtins.
   __ TestBit(scratch,
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
              SharedFunctionInfo::kNative,
 #else
              SharedFunctionInfo::kNative + kSmiTagSize,
@@ -4402,7 +4402,7 @@ void LCodeGen::DoNumberTagI(LNumberTagI* instr) {
   Register dst = ToRegister(instr->result());
 
   DeferredNumberTagI* deferred = new(zone()) DeferredNumberTagI(this, instr);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ SmiTag(dst, src);
 #else
   __ SmiTagCheckOverflow(dst, src, r0);

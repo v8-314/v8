@@ -132,7 +132,7 @@ int MacroAssembler::CallSize(
   }
 #else
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   movSize = 5;
 #else
   movSize = 2;
@@ -160,7 +160,7 @@ int MacroAssembler::CallSizeNotPredictableCodeSize(
   }
 #else
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   movSize = 5;
 #else
   movSize = 2;
@@ -196,7 +196,7 @@ void MacroAssembler::Call(Address target,
   mtlr(ip);
   bclr(BA, SetLK);
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ASSERT(kCallTargetAddressOffset == 7 * kInstrSize);
 #else
   ASSERT(kCallTargetAddressOffset == 4 * kInstrSize);
@@ -1773,7 +1773,7 @@ void MacroAssembler::StoreNumberToDoubleElements(Register value_reg,
                                                  Register scratch4,
                                                  Label* fail) {
   Label smi_value, maybe_nan, have_double_value, is_nan, done;
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   Register double_reg = scratch2;
 #else
   Register mantissa_reg = scratch2;
@@ -1792,7 +1792,7 @@ void MacroAssembler::StoreNumberToDoubleElements(Register value_reg,
 
   // Check for nan: all NaN values have a value greater (signed) than 0x7ff00000
   // in the exponent.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   mov(scratch1, Operand(kLastNonNaNInt64));
   addi(scratch3, value_reg, Operand(-kHeapObjectTag));
   ld(double_reg, MemOperand(scratch3, HeapNumber::kValueOffset));
@@ -1804,14 +1804,14 @@ void MacroAssembler::StoreNumberToDoubleElements(Register value_reg,
 #endif
   bge(&maybe_nan);
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
   lwz(mantissa_reg, FieldMemOperand(value_reg, HeapNumber::kMantissaOffset));
 #endif
 
   bind(&have_double_value);
   SmiToDoubleArrayOffset(scratch1, key_reg);
   add(scratch1, elements_reg, scratch1);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   addi(scratch1, scratch1, Operand(-kHeapObjectTag));
   std(double_reg, MemOperand(scratch1, FixedDoubleArray::kHeaderSize));
 #else
@@ -1831,7 +1831,7 @@ void MacroAssembler::StoreNumberToDoubleElements(Register value_reg,
   // Could be NaN or Infinity. If fraction is not zero, it's NaN, otherwise
   // it's an Infinity, and the non-NaN code path applies.
   bgt(&is_nan);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   clrldi(r0, double_reg, Operand(32), SetRC);
   beq(&have_double_value, cr0);
 #else
@@ -1843,7 +1843,7 @@ void MacroAssembler::StoreNumberToDoubleElements(Register value_reg,
   // Load canonical NaN for storing into the double array.
   uint64_t nan_int64 = BitCast<uint64_t>(
       FixedDoubleArray::canonical_not_the_hole_nan_as_double());
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   mov(double_reg, Operand(nan_int64));
 #else
   mov(mantissa_reg, Operand(static_cast<intptr_t>(nan_int64)));
@@ -2036,7 +2036,7 @@ void MacroAssembler::TryGetFunctionPrototype(Register function,
     lwz(scratch,
         FieldMemOperand(scratch, SharedFunctionInfo::kCompilerHintsOffset));
     TestBit(scratch,
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
             SharedFunctionInfo::kBoundFunction,
 #else
             SharedFunctionInfo::kBoundFunction + kSmiTagSize,
@@ -2122,7 +2122,7 @@ void MacroAssembler::CallApiFunctionAndReturn(ExternalReference function,
   addi(r29, r29, Operand(1));
   stw(r29, MemOperand(r26, kLevelOffset));
 
-#if !ABI_RETURNS_HANDLES_IN_REGS
+#if !defined(ABI_RETURNS_HANDLES_IN_REGS)
   // PPC LINUX ABI
   // The return value is pointer-sized non-scalar value.
   // Space has already been allocated on the stack which will pass as an
@@ -2136,7 +2136,7 @@ void MacroAssembler::CallApiFunctionAndReturn(ExternalReference function,
   DirectCEntryStub stub;
   stub.GenerateCall(this, function);
 
-#if !ABI_RETURNS_HANDLES_IN_REGS
+#if !defined(ABI_RETURNS_HANDLES_IN_REGS)
   // Retrieve return value from stack buffer
   LoadP(r3, MemOperand(r3));
 #endif
@@ -2228,7 +2228,7 @@ void MacroAssembler::IndexFromHash(Register hash, Register index) {
   STATIC_ASSERT(String::kHashShift == 2);
   STATIC_ASSERT(String::kArrayIndexValueBits == 24);
   // index = SmiTag((hash >> 2) & 0x00FFFFFF);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ExtractBitRange(index, hash, 25, 2);
   SmiTag(index);
 #else
@@ -2264,7 +2264,7 @@ void MacroAssembler::ConvertToInt32(Register source,
 
   addi(sp, sp, Operand(-kDoubleSize));
   stfd(double_scratch, MemOperand(sp, 0));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ld(dest, MemOperand(sp, 0));
 #else
 #if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
@@ -2279,7 +2279,7 @@ void MacroAssembler::ConvertToInt32(Register source,
 
   // The result is not a 32-bit integer when the high 33 bits of the
   // result are not identical.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   TestIfInt32(dest, scratch, scratch2);
 #else
   TestIfInt32(scratch, dest, scratch2);
@@ -2305,7 +2305,7 @@ void MacroAssembler::EmitVFPTruncate(VFPRoundingMode rounding_mode,
 
   addi(sp, sp, Operand(-kDoubleSize));
   stfd(double_scratch, MemOperand(sp, 0));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ld(result, MemOperand(sp, 0));
 #else
 #if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
@@ -2320,7 +2320,7 @@ void MacroAssembler::EmitVFPTruncate(VFPRoundingMode rounding_mode,
 
   // The result is a 32-bit integer when the high 33 bits of the
   // result are identical.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   TestIfInt32(result, scratch, r0);
 #else
   TestIfInt32(scratch, result, r0);
@@ -2439,7 +2439,7 @@ void MacroAssembler::EmitECMATruncate(Register result,
 
   // reserve a slot on the stack
   stfdu(double_scratch, MemOperand(sp, -8));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ld(result, MemOperand(sp, 0));
 #else
 #if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
@@ -2453,7 +2453,7 @@ void MacroAssembler::EmitECMATruncate(Register result,
 
   // The result is a 32-bit integer when the high 33 bits of the
   // result are identical.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   TestIfInt32(result, scratch, r0);
 #else
   TestIfInt32(scratch, result, r0);
@@ -2484,7 +2484,7 @@ void MacroAssembler::EmitECMATruncate(Register result,
 void MacroAssembler::GetLeastBitsFromSmi(Register dst,
                                          Register src,
                                          int num_least_bits) {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   rldicl(dst, src, kBitsPerPointer - kSmiShift,
          kBitsPerPointer - num_least_bits);
 #else
@@ -2519,7 +2519,7 @@ void MacroAssembler::CallRuntime(const Runtime::Function* f,
   // smarter.
   mov(r3, Operand(num_arguments));
   mov(r4, Operand(ExternalReference(f, isolate())));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   CEntryStub stub(f->result_size);
 #else
   CEntryStub stub(1);
@@ -2859,7 +2859,7 @@ void MacroAssembler::JumpIfNotPowerOfTwoOrZeroAndNeg(
   bne(not_power_of_two, cr0);
 }
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
 void MacroAssembler::SmiTagCheckOverflow(Register reg, Register overflow) {
   ASSERT(!reg.is(overflow));
   mr(overflow, reg);  // Save original value.
@@ -3141,7 +3141,7 @@ void MacroAssembler::CopyBytes(Register src,
     stb(scratch, MemOperand(dst, 2));
     ShiftRightImm(scratch, scratch, Operand(8));
     stb(scratch, MemOperand(dst, 3));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     ShiftRightImm(scratch, scratch, Operand(8));
     stb(scratch, MemOperand(dst, 4));
     ShiftRightImm(scratch, scratch, Operand(8));
@@ -3152,7 +3152,7 @@ void MacroAssembler::CopyBytes(Register src,
     stb(scratch, MemOperand(dst, 7));
 #endif
 #else
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     stb(scratch, MemOperand(dst, 7));
     ShiftRightImm(scratch, scratch, Operand(8));
     stb(scratch, MemOperand(dst, 6));
@@ -3356,13 +3356,13 @@ void MacroAssembler::CallCFunctionHelper(Register function,
   // Just call directly. The function called cannot cause a GC, or
   // allow preemption, so the return address in the link register
   // stays correct.
-#if ABI_USES_FUNCTION_DESCRIPTORS && !defined(USE_SIMULATOR)
+#if defined(ABI_USES_FUNCTION_DESCRIPTORS) && !defined(USE_SIMULATOR)
   // AIX uses a function descriptor. When calling C code be aware
   // of this descriptor and pick up values from it
   Register dest = ip;
   LoadP(ToRegister(2), MemOperand(function, kPointerSize));
   LoadP(dest, MemOperand(function, 0));
-#elif ABI_TOC_ADDRESSABILITY_VIA_IP
+#elif defined(ABI_TOC_ADDRESSABILITY_VIA_IP)
   Register dest = ip;
   Move(ip, function);
 #else
@@ -3427,7 +3427,7 @@ void MacroAssembler::PatchRelocatedValue(Register lis_location,
   }
 
   // insert new high word into lis instruction
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   srdi(ip, new_value, Operand(32));
   rlwimi(scratch, ip, 16, 16, 31);
 #else
@@ -3446,14 +3446,14 @@ void MacroAssembler::PatchRelocatedValue(Register lis_location,
   }
 
   // insert new low word into ori instruction
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   rlwimi(scratch, ip, 0, 16, 31);
 #else
   rlwimi(scratch, new_value, 0, 16, 31);
 #endif
   stw(scratch, MemOperand(lis_location, kInstrSize));
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   if (emit_debug_code()) {
     lwz(scratch, MemOperand(lis_location, 2*kInstrSize));
     // scratch is now sldi.
@@ -3487,7 +3487,7 @@ void MacroAssembler::PatchRelocatedValue(Register lis_location,
 #endif
 
   // Update the I-cache so the new lis and addic can be executed.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   FlushICache(lis_location, 5 * kInstrSize, scratch);
 #else
   FlushICache(lis_location, 2 * kInstrSize, scratch);
@@ -3519,7 +3519,7 @@ void MacroAssembler::GetRelocatedValueLocation(Register lis_location,
   // Copy the low 16bits from ori instruction into result
   rlwimi(result, scratch, 0, 16, 31);
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   if (emit_debug_code()) {
     lwz(scratch, MemOperand(lis_location, 2*kInstrSize));
     // scratch is now sldi.
@@ -3698,7 +3698,7 @@ void MacroAssembler::EnsureNotWhite(
   Register map = load_scratch;  // Holds map while checking type.
   Register length = load_scratch;  // Holds length of object after testing type.
   Label is_data_object, maybe_string_object, is_string_object, is_encoded;
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   Label length_computed;
 #endif
 
@@ -3744,11 +3744,11 @@ void MacroAssembler::EnsureNotWhite(
   andi(r0, instance_type, Operand(kStringEncodingMask));
   beq(&is_encoded, cr0);
   SmiUntag(ip);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   b(&length_computed);
 #endif
   bind(&is_encoded);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   SmiToShortArrayOffset(ip, ip);
   bind(&length_computed);
 #else
@@ -3932,7 +3932,7 @@ void MacroAssembler::LoadIntLiteral(Register dst, int value) {
 
 void MacroAssembler::LoadSmiLiteral(Register dst, Smi *smi) {
   intptr_t value = reinterpret_cast<intptr_t>(smi);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   ASSERT((value & 0xffffffff) == 0);
   LoadIntLiteral(dst, value >> 32);
   ShiftLeftImm(dst, dst, Operand(32));
@@ -3949,7 +3949,7 @@ void MacroAssembler::LoadDoubleLiteral(DwVfpRegister result,
   // avoid gcc strict aliasing error using union cast
   union {
     double dval;
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     intptr_t ival;
 #else
     intptr_t ival[2];
@@ -3957,7 +3957,7 @@ void MacroAssembler::LoadDoubleLiteral(DwVfpRegister result,
   } litVal;
 
   litVal.dval = value;
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   mov(scratch, Operand(litVal.ival));
   std(scratch, MemOperand(sp));
 #else
@@ -4053,7 +4053,7 @@ void MacroAssembler::Xor(Register ra, Register rs, const Operand& rb,
 
 void MacroAssembler::CmpSmiLiteral(Register src1, Smi *smi, Register scratch,
                                    CRegister cr) {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   LoadSmiLiteral(scratch, smi);
   cmp(src1, scratch, cr);
 #else
@@ -4063,7 +4063,7 @@ void MacroAssembler::CmpSmiLiteral(Register src1, Smi *smi, Register scratch,
 
 void MacroAssembler::CmplSmiLiteral(Register src1, Smi *smi, Register scratch,
                                    CRegister cr) {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   LoadSmiLiteral(scratch, smi);
   cmpl(src1, scratch, cr);
 #else
@@ -4073,7 +4073,7 @@ void MacroAssembler::CmplSmiLiteral(Register src1, Smi *smi, Register scratch,
 
 void MacroAssembler::AddSmiLiteral(Register dst, Register src, Smi *smi,
                                    Register scratch) {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   LoadSmiLiteral(scratch, smi);
   add(dst, src, scratch);
 #else
@@ -4083,7 +4083,7 @@ void MacroAssembler::AddSmiLiteral(Register dst, Register src, Smi *smi,
 
 void MacroAssembler::SubSmiLiteral(Register dst, Register src, Smi *smi,
                                    Register scratch) {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   LoadSmiLiteral(scratch, smi);
   sub(dst, src, scratch);
 #else
@@ -4093,7 +4093,7 @@ void MacroAssembler::SubSmiLiteral(Register dst, Register src, Smi *smi,
 
 void MacroAssembler::AndSmiLiteral(Register dst, Register src, Smi *smi,
                                    Register scratch, RCBit rc) {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   LoadSmiLiteral(scratch, smi);
   and_(dst, src, scratch, rc);
 #else
@@ -4110,13 +4110,13 @@ void MacroAssembler::LoadP(Register dst, const MemOperand& mem,
   if (!scratch.is(no_reg) && !is_int16(offset)) {
     /* cannot use d-form */
     LoadIntLiteral(scratch, offset);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     ldx(dst, MemOperand(mem.ra(), scratch));
 #else
     lwzx(dst, MemOperand(mem.ra(), scratch));
 #endif
   } else {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     int misaligned = (offset & 3);
     if (misaligned) {
       // adjust base to conform to offset alignment requirements
@@ -4141,13 +4141,13 @@ void MacroAssembler::StoreP(Register src, const MemOperand& mem,
   if (!scratch.is(no_reg) && !is_int16(offset)) {
     /* cannot use d-form */
     LoadIntLiteral(scratch, offset);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     stdx(src, MemOperand(mem.ra(), scratch));
 #else
     stwx(src, MemOperand(mem.ra(), scratch));
 #endif
   } else {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     int misaligned = (offset & 3);
     if (misaligned) {
       // adjust base to conform to offset alignment requirements
@@ -4176,14 +4176,14 @@ void MacroAssembler::LoadWordArith(Register dst, const MemOperand& mem,
   if (!scratch.is(no_reg) && !is_int16(offset)) {
     /* cannot use d-form */
     LoadIntLiteral(scratch, offset);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     // lwax(dst, MemOperand(mem.ra(), scratch));
     ASSERT(0);  // lwax not yet implemented
 #else
     lwzx(dst, MemOperand(mem.ra(), scratch));
 #endif
   } else {
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     int misaligned = (offset & 3);
     if (misaligned) {
       // adjust base to conform to offset alignment requirements

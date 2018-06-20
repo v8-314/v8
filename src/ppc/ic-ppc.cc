@@ -1807,7 +1807,7 @@ void PatchInlinedSmiCode(Address address, InlinedSmiCheck check) {
     patcher.masm()->TestIfSmi(reg, r0);
   } else {
     ASSERT(check == DISABLE_INLINED_SMI_CHECK);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     ASSERT(Assembler::IsRldicl(instr_at_patch));
 #else
     ASSERT(Assembler::IsRlwinm(instr_at_patch));

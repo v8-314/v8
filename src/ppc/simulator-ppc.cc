@@ -1332,7 +1332,7 @@ void Simulator::SoftwareInterrupt(Instruction* instr) {
           PrintF("\n");
         }
         CHECK(stack_aligned);
-#if ABI_RETURNS_HANDLES_IN_REGS
+#ifdef ABI_RETURNS_HANDLES_IN_REGS
         intptr_t p0 = arg0;
 #else
         intptr_t p0 = arg1;
@@ -1341,7 +1341,7 @@ void Simulator::SoftwareInterrupt(Instruction* instr) {
         if (::v8::internal::FLAG_trace_sim) {
           PrintF("Returned %p\n", reinterpret_cast<void *>(*result));
         }
-#if ABI_RETURNS_HANDLES_IN_REGS
+#ifdef ABI_RETURNS_HANDLES_IN_REGS
         arg0 = (intptr_t)*result;
 #else
         *(reinterpret_cast<intptr_t*>(arg0)) = (intptr_t) *result;
@@ -1363,21 +1363,21 @@ void Simulator::SoftwareInterrupt(Instruction* instr) {
           PrintF("\n");
         }
         CHECK(stack_aligned);
-#if ABI_RETURNS_HANDLES_IN_REGS
+#ifdef ABI_RETURNS_HANDLES_IN_REGS
         intptr_t p0 = arg0;
         intptr_t p1 = arg1;
 #else
         intptr_t p0 = arg1;
         intptr_t p1 = arg2;
 #endif
-#if !ABI_PASSES_HANDLES_IN_REGS
+#if !defined(ABI_PASSES_HANDLES_IN_REGS)
         p0 = *(reinterpret_cast<intptr_t *>(p0));
 #endif
         v8::Handle<v8::Value> result = target(p0, p1);
         if (::v8::internal::FLAG_trace_sim) {
           PrintF("Returned %p\n", reinterpret_cast<void *>(*result));
         }
-#if ABI_RETURNS_HANDLES_IN_REGS
+#ifdef ABI_RETURNS_HANDLES_IN_REGS
         arg0 = (intptr_t)*result;
 #else
         *(reinterpret_cast<intptr_t*>(arg0)) = (intptr_t) *result;
@@ -1408,7 +1408,7 @@ void Simulator::SoftwareInterrupt(Instruction* instr) {
         }
         CHECK(stack_aligned);
         int64_t result = target(arg0, arg1, arg2, arg3, arg4, arg5);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
         if (::v8::internal::FLAG_trace_sim) {
           PrintF("Returned %08" V8PRIxPTR "\n", result);
         }
@@ -1671,7 +1671,7 @@ bool Simulator::DecodeExt2_10bit(Instruction *instr) {
       }
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case SRDX: {
       int rs = instr->RSValue();
       int ra = instr->RAValue();
@@ -1699,7 +1699,7 @@ bool Simulator::DecodeExt2_10bit(Instruction *instr) {
       }
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case SRAD: {
       int rs = instr->RSValue();
       int ra = instr->RAValue();
@@ -1726,7 +1726,7 @@ bool Simulator::DecodeExt2_10bit(Instruction *instr) {
       }
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case EXTSW: {
       const int shift = kBitsPerPointer - 32;
       int ra = instr->RAValue();
@@ -1980,7 +1980,7 @@ void Simulator::DecodeExt2_9bit(Instruction* instr) {
       }
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case SLDX: {
       int rs = instr->RSValue();
       int ra = instr->RAValue();
@@ -2017,7 +2017,7 @@ void Simulator::DecodeExt2_9bit(Instruction* instr) {
       }
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case CNTLZDX: {
       int rs = instr->RSValue();
       int ra = instr->RAValue();
@@ -2139,7 +2139,7 @@ void Simulator::DecodeExt2_9bit(Instruction* instr) {
       // todo - handle OE bit
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case MULLD: {
       int rt = instr->RTValue();
       int ra = instr->RAValue();
@@ -2170,7 +2170,7 @@ void Simulator::DecodeExt2_9bit(Instruction* instr) {
       // todo - handle OE bit
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case DIVD: {
       int rt = instr->RTValue();
       int ra = instr->RAValue();
@@ -2316,7 +2316,7 @@ void Simulator::DecodeExt2_9bit(Instruction* instr) {
       }
       break;
     }
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case LDX:
     case LDUX: {
       int rt = instr->RTValue();
@@ -2672,7 +2672,7 @@ void Simulator::DecodeExt4(Instruction* instr) {
   UNIMPLEMENTED();  // Not used by V8.
 }
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
 void Simulator::DecodeExt5(Instruction* instr) {
   switch (instr->Bits(4, 2) << 2) {
     case RLDICL: {
@@ -3195,7 +3195,7 @@ void Simulator::InstructionDecode(Instruction* instr) {
       break;
     }
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     case EXT5: {
       DecodeExt5(instr);
       break;
@@ -3339,7 +3339,7 @@ intptr_t Simulator::Call(byte* entry, int argument_count, ...) {
   set_register(sp, entry_stack);
 
   // Prepare to execute the code at entry
-#if ABI_USES_FUNCTION_DESCRIPTORS
+#ifdef ABI_USES_FUNCTION_DESCRIPTORS
   // entry is the function descriptor
   set_pc(*(reinterpret_cast<intptr_t *>(entry)));
 #else

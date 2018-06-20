@@ -660,7 +660,7 @@ void FloatingPointHelper::ConvertIntToDouble(MacroAssembler* masm,
   __ subi(sp, sp, Operand(8));  // reserve one temporary double on the stack
 
   // sign-extend src to 64-bit and store it to temp double on the stack
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ extsw(r0, src);
   __ std(r0, MemOperand(sp, 0));
 #else
@@ -692,7 +692,7 @@ void FloatingPointHelper::ConvertUnsignedIntToDouble(MacroAssembler* masm,
   __ subi(sp, sp, Operand(8));  // reserve one temporary double on the stack
 
   // zero-extend src to 64-bit and store it to temp double on the stack
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ clrldi(r0, src, Operand(32));
   __ std(r0, MemOperand(sp, 0));
 #else
@@ -722,7 +722,7 @@ void FloatingPointHelper::ConvertIntToFloat(MacroAssembler* masm,
   __ subi(sp, sp, Operand(8));  // reserve one temporary double on the stack
 
   // sign-extend src to 64-bit and store it to temp double on the stack
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ extsw(int_scratch, src);
   __ std(int_scratch, MemOperand(sp, 0));
 #else
@@ -1559,7 +1559,7 @@ void ToBooleanStub::Generate(MacroAssembler* masm) {
     __ lfd(d1, FieldMemOperand(tos_, HeapNumber::kValueOffset));
     __ li(r0, Operand::Zero());
     __ push(r0);
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
     __ push(r0);
 #endif
     __ lfd(d2, MemOperand(sp, 0));
@@ -1847,7 +1847,7 @@ void UnaryOpStub::GenerateHeapNumberCodeBitNot(
   // Do the bitwise operation and check if the result fits in a smi.
   __ notx(r4, r4);
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
   Label try_float;
   __ JumpIfNotSmiCandidate(r4, r5, &try_float);
 #endif
@@ -1856,7 +1856,7 @@ void UnaryOpStub::GenerateHeapNumberCodeBitNot(
   __ SmiTag(r3, r4);
   __ Ret();
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
   // Try to store the result in a heap number.
   __ bind(&try_float);
   if (mode_ == UNARY_NO_OVERWRITE) {
@@ -2073,7 +2073,7 @@ void BinaryOpStub::GenerateSmiSmiOperation(MacroAssembler* masm) {
     }
     case Token::MUL: {
       Label mul_zero, mul_neg_zero;
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       // Remove tag from both operands.
       __ SmiUntag(ip, right);
       __ SmiUntag(r0, left);
@@ -2102,7 +2102,7 @@ void BinaryOpStub::GenerateSmiSmiOperation(MacroAssembler* masm) {
       // Go slow on zero result to handle -0.
       __ cmpi(scratch1, Operand::Zero());
       __ beq(&mul_zero);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       __ SmiTag(right, scratch1);
 #else
       __ mr(right, scratch1);
@@ -2160,7 +2160,7 @@ void BinaryOpStub::GenerateSmiSmiOperation(MacroAssembler* masm) {
       __ sub(scratch1, ip, scratch1, LeaveOE, SetRC);
       // If the result is 0, we need to check for the -0 case.
       __ beq(&check_neg_zero, cr0);
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
       // Check that the signed result fits in a Smi.
       __ JumpIfNotSmiCandidate(scratch1, scratch2, &not_smi_result);
 #endif
@@ -2212,7 +2212,7 @@ void BinaryOpStub::GenerateSmiSmiOperation(MacroAssembler* masm) {
       __ SmiUntag(scratch1, left);
       __ GetLeastBitsFromSmi(scratch2, right, 5);
       __ ShiftLeft(scratch1, scratch1, scratch2);
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
       // Check that the signed result fits in a Smi.
       __ JumpIfNotSmiCandidate(scratch1, scratch2, &not_smi_result);
 #endif
@@ -2358,7 +2358,7 @@ void BinaryOpStub::GenerateFPOperation(MacroAssembler* masm,
           // The code below for writing into heap numbers isn't capable of
           // writing the register as an unsigned int so we go to slow case if we
           // hit this case.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
           const Condition cond = ne;
           __ srw(r5, r6, r5);
           __ TestSignBit32(r5, r0);
@@ -2378,7 +2378,7 @@ void BinaryOpStub::GenerateFPOperation(MacroAssembler* masm,
           UNREACHABLE();
       }
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
       // Check that the *signed* result fits in a smi.
       __ JumpIfNotSmiCandidate(r5, r6, &result_not_a_smi);
 #endif
@@ -2631,7 +2631,7 @@ void BinaryOpStub::GenerateInt32Stub(MacroAssembler* masm) {
                             &transition : &return_heap_number);
         __ bne(not_int32);
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
         // Check if the result fits in a smi.
         // If not try to return a heap number.
         __ JumpIfNotSmiCandidate(scratch1, scratch2, &return_heap_number);
@@ -2643,7 +2643,7 @@ void BinaryOpStub::GenerateInt32Stub(MacroAssembler* masm) {
 
         __ subi(sp, sp, Operand(8));
         __ stfd(d1, MemOperand(sp, 0));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
         __ ld(scratch2, MemOperand(sp, 0));
 #else
 #if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
@@ -2743,7 +2743,7 @@ void BinaryOpStub::GenerateInt32Stub(MacroAssembler* masm) {
           // We only get a negative result if the shift value (r5) is 0.
           // This result cannot be respresented as a signed 32-bit integer, try
           // to return a heap number if we can.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
           const Condition cond = ne;
           __ srw(r5, r6, r5);
           __ TestSignBit32(r5, r0);
@@ -2764,7 +2764,7 @@ void BinaryOpStub::GenerateInt32Stub(MacroAssembler* masm) {
           UNREACHABLE();
       }
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
       // Check if the result fits in a smi.
       // If not try to return a heap number. (We know the result is an int32.)
       __ JumpIfNotSmiCandidate(r5, scratch1, &return_heap_number);
@@ -3084,7 +3084,7 @@ void TranscendentalCacheStub::Generate(MacroAssembler* masm) {
     char* elem_in1 = reinterpret_cast<char*>(&(test_elem[0].in[1]));
     char* elem_out = reinterpret_cast<char*>(&(test_elem[0].output));
     // Two uint_32's and a pointer.
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     CHECK_EQ(16, static_cast<int>(elem2_start - elem_start));
 #else
     CHECK_EQ(12, static_cast<int>(elem2_start - elem_start));
@@ -3095,7 +3095,7 @@ void TranscendentalCacheStub::Generate(MacroAssembler* masm) {
   }
 #endif
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   // Find the address of the r4'th entry in the cache, i.e., &r3[r4*16].
   __ ShiftLeftImm(scratch0, r4, Operand(4));
 #else
@@ -3598,12 +3598,12 @@ void CEntryStub::GenerateCore(MacroAssembler* masm,
 
   __ mov(isolate_reg, Operand(ExternalReference::isolate_address()));
 
-#if ABI_USES_FUNCTION_DESCRIPTORS && !defined(USE_SIMULATOR)
+#if defined(ABI_USES_FUNCTION_DESCRIPTORS) && !defined(USE_SIMULATOR)
   // Native AIX/PPC64 Linux use a function descriptor.
   __ LoadP(ToRegister(2), MemOperand(r15, kPointerSize));  // TOC
   __ LoadP(ip, MemOperand(r15, 0));  // Instruction address
   Register target = ip;
-#elif ABI_TOC_ADDRESSABILITY_VIA_IP
+#elif defined(ABI_TOC_ADDRESSABILITY_VIA_IP)
   Register target = ip;
   __ Move(ip, r15);
 #else
@@ -3814,7 +3814,7 @@ void JSEntryStub::GenerateBody(MacroAssembler* masm, bool is_construct) {
   Label invoke, handler_entry, exit;
 
   // Called from C
-#if ABI_USES_FUNCTION_DESCRIPTORS
+#ifdef ABI_USES_FUNCTION_DESCRIPTORS
   __ function_descriptor();
 #endif
 
@@ -3993,7 +3993,7 @@ void InstanceofStub::Generate(MacroAssembler* masm) {
   const Register scratch2 = r8;
   Register scratch3 = no_reg;
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   const int32_t kDeltaToLoadBoolResult = 9 * Assembler::kInstrSize;
 #else
   const int32_t kDeltaToLoadBoolResult = 5 * Assembler::kInstrSize;
@@ -4875,7 +4875,7 @@ void RegExpExecStub::Generate(MacroAssembler* masm) {
   __ addi(code, code, Operand(Code::kHeaderSize - kHeapObjectTag));
 
 
-#if ABI_USES_FUNCTION_DESCRIPTORS && defined(USE_SIMULATOR)
+#if defined(ABI_USES_FUNCTION_DESCRIPTORS) && defined(USE_SIMULATOR)
   // Even Simulated AIX/PPC64 Linux uses a function descriptor for the
   // RegExp routine.  Extract the instruction address here since
   // DirectCEntryStub::GenerateCall will not do it for calls out to
@@ -6777,12 +6777,12 @@ void DirectCEntryStub::GenerateCall(MacroAssembler* masm,
 void DirectCEntryStub::GenerateCall(MacroAssembler* masm,
                                     Register target) {
   Register scratch = r11;
-#if ABI_USES_FUNCTION_DESCRIPTORS && !defined(USE_SIMULATOR)
+#if defined(ABI_USES_FUNCTION_DESCRIPTORS) && !defined(USE_SIMULATOR)
   Register dest = ip;
   // Native AIX/PPC64 Linux use a function descriptor.
   __ LoadP(ToRegister(2), MemOperand(target, kPointerSize));  // TOC
   __ LoadP(ip, MemOperand(target, 0));  // Instruction address
-#elif ABI_TOC_ADDRESSABILITY_VIA_IP
+#elif defined(ABI_TOC_ADDRESSABILITY_VIA_IP)
   Register dest = ip;
   __ Move(ip, target);
 #else
@@ -7411,7 +7411,7 @@ void StoreArrayLiteralElementStub::Generate(MacroAssembler* masm) {
   __ LoadP(r8, FieldMemOperand(r4, JSObject::kElementsOffset));
   __ SmiToPtrArrayOffset(r9, r6);
   __ add(r9, r8, r9);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   // add due to offset alignment requirements of StorePU
   __ addi(r9, r9, Operand(FixedArray::kHeaderSize - kHeapObjectTag));
   __ StoreP(r3, MemOperand(r9));
@@ -7485,11 +7485,11 @@ void ProfileEntryHookStub::Generate(MacroAssembler* masm) {
   __ mov(ip, Operand(reinterpret_cast<intptr_t>(&entry_hook_)));
   __ LoadP(ip, MemOperand(ip));
 
-#if ABI_USES_FUNCTION_DESCRIPTORS
+#ifdef ABI_USES_FUNCTION_DESCRIPTORS
   // Function descriptor
   __ LoadP(ToRegister(2), MemOperand(ip, kPointerSize));
   __ LoadP(ip, MemOperand(ip, 0));
-#elif ABI_TOC_ADDRESSABILITY_VIA_IP
+#elif defined(ABI_TOC_ADDRESSABILITY_VIA_IP)
   // ip already set.
 #endif
 

@@ -198,7 +198,7 @@ void StubCache::GenerateProbe(MacroAssembler* masm,
   Isolate* isolate = masm->isolate();
   Label miss;
 
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   // Make sure that code is valid. The multiplying code relies on the
   // entry size being 24.
   ASSERT(sizeof(Entry) == 24);
@@ -239,7 +239,7 @@ void StubCache::GenerateProbe(MacroAssembler* masm,
   __ lwz(scratch, FieldMemOperand(name, String::kHashFieldOffset));
   __ LoadP(ip, FieldMemOperand(receiver, HeapObject::kMapOffset));
   __ add(scratch, scratch, ip);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   // Use only the low 32 bits of the map pointer.
   __ rldicl(scratch, scratch, 0, 32);
 #endif
@@ -728,7 +728,7 @@ static void GenerateFastApiDirectCall(MacroAssembler* masm,
   // Prepare arguments.
   __ addi(r5, sp, Operand(3 * kPointerSize));
 
-#if !ABI_RETURNS_HANDLES_IN_REGS
+#if !defined(ABI_RETURNS_HANDLES_IN_REGS)
   bool alloc_return_buf = true;
 #else
   bool alloc_return_buf = false;
@@ -1213,7 +1213,7 @@ void StubCompiler::GenerateLoadCallback(Handle<JSObject> object,
                                         Handle<AccessorInfo> callback,
                                         Handle<String> name,
                                         Label* miss) {
-#if !ABI_RETURNS_HANDLES_IN_REGS
+#if !defined(ABI_RETURNS_HANDLES_IN_REGS)
   bool alloc_return_buf = true;
 #else
   bool alloc_return_buf = false;
@@ -1263,7 +1263,7 @@ void StubCompiler::GenerateLoadCallback(Handle<JSObject> object,
   // If alloc_return_buf, we shift the arguments over a register
   // (e.g. r3 -> r4) to allow for the return value buffer in implicit
   // first arg.  CallApiFunctionAndReturn will setup r3.
-#if ABI_PASSES_HANDLES_IN_REGS
+#ifdef ABI_PASSES_HANDLES_IN_REGS
   const int kAccessorInfoSlot = kStackFrameExtraParamSlot +
                                   (alloc_return_buf ? 2 : 1);
 #else
@@ -1281,7 +1281,7 @@ void StubCompiler::GenerateLoadCallback(Handle<JSObject> object,
   FrameScope frame_scope(masm(), StackFrame::MANUAL);
   __ EnterExitFrame(false, kApiStackSpace);
 
-#if !ABI_PASSES_HANDLES_IN_REGS
+#if !defined(ABI_PASSES_HANDLES_IN_REGS)
   // pass 1st arg by reference
   __ StoreP(arg0, MemOperand(sp, kArg0Slot * kPointerSize));
   __ addi(arg0, sp, Operand(kArg0Slot * kPointerSize));
@@ -2155,7 +2155,7 @@ Handle<Code> CallStubCompiler::CompileMathFloorCall(
     // The frim instruction is only supported on POWER5
     // and higher
     __ frim(d1, d1);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     __ fctidz(d1, d1);
 #else
     __ fctiwz(d1, d1);
@@ -2166,7 +2166,7 @@ Handle<Code> CallStubCompiler::CompileMathFloorCall(
     // perf benefit or if we can simply use the compatible sequence
     // always
     __ SetRoundingMode(kRoundToMinusInf);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
     __ fctid(d1, d1);
 #else
     __ fctiw(d1, d1);
@@ -2175,7 +2175,7 @@ Handle<Code> CallStubCompiler::CompileMathFloorCall(
   }
   // Convert the argument to an integer.
   __ stfdu(d1, MemOperand(sp, -8));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ ld(r3, MemOperand(sp, 0));
 #else
 #if __FLOAT_WORD_ORDER == __LITTLE_ENDIAN
@@ -3623,7 +3623,7 @@ static void GenerateSmiKeyCheck(MacroAssembler* masm,
                      double_scratch1,
                      kCheckForInexactConversion);
   __ bne(fail);
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
   __ SmiTag(key, scratch0);
 #else
   __ SmiTagCheckOverflow(scratch1, scratch0, r0);
@@ -3692,7 +3692,7 @@ void KeyedLoadStubCompiler::GenerateLoadExternalArray(
     case EXTERNAL_INT_ELEMENTS:
       __ SmiToIntArrayOffset(value, key);
       __ lwzx(value, MemOperand(r6, value));
-#if V8_TARGET_ARCH_PPC64
+#ifdef V8_TARGET_ARCH_PPC64
       __ extsw(value, value);
 #endif
       break;
@@ -3731,7 +3731,7 @@ void KeyedLoadStubCompiler::GenerateLoadExternalArray(
     // For the Int and UnsignedInt array types, we need to see whether
     // the value can be represented in a Smi. If not, we need to convert
     // it to a HeapNumber.
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
     Label box_int;
     // Check that the value fits in a smi.
     __ JumpIfNotSmiCandidate(value, r0, &box_int);
@@ -3740,7 +3740,7 @@ void KeyedLoadStubCompiler::GenerateLoadExternalArray(
     __ SmiTag(r3, value);
     __ Ret();
 
-#if !V8_TARGET_ARCH_PPC64
+#if !defined(V8_TARGET_ARCH_PPC64)
     __ bind(&box_int);
     // Allocate a HeapNumber for the result and perform int-to-double
     // conversion.  Don't touch r3 or r4 as they are needed if allocation
