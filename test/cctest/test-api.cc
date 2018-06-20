@@ -17718,6 +17718,7 @@ THREADED_TEST(Regress157124) {
   obj->DeleteHiddenValue(v8_str("Bug"));
 }
 
+/*
 
 THREADED_TEST(Regress260106) {
   LocalContext context;
@@ -17728,6 +17729,8 @@ THREADED_TEST(Regress260106) {
   CHECK(!function.IsEmpty());
   CHECK(function->IsFunction());
 }
+
+*/
 
 
 #ifndef WIN32
