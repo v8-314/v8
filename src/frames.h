@@ -67,7 +67,7 @@ class InnerPointerToCodeCache {
   Code* GcSafeCastToCode(HeapObject* object, Address inner_pointer);
 
   void Flush() {
-    memset(&cache_[0], 0, sizeof(cache_));
+    memset(static_cast<void*>(&cache_[0]), 0, sizeof(cache_));
   }
 
   InnerPointerToCodeCacheEntry* GetCacheEntry(Address inner_pointer);
