@@ -1800,6 +1800,7 @@ void Assembler::Nop(int n) {
     switch (n) {
       case 2:
         emit(0x66);
+        // intentional fallthrough
       case 1:
         emit(0x90);
         return;
@@ -1816,6 +1817,7 @@ void Assembler::Nop(int n) {
         return;
       case 6:
         emit(0x66);
+        // intentional fallthrough
       case 5:
         emit(0x0f);
         emit(0x1f);
@@ -1836,12 +1838,15 @@ void Assembler::Nop(int n) {
       case 11:
         emit(0x66);
         n--;
+        // intentional fallthrough
       case 10:
         emit(0x66);
         n--;
+        // intentional fallthrough
       case 9:
         emit(0x66);
         n--;
+        // intentional fallthrough
       case 8:
         emit(0x0f);
         emit(0x1f);

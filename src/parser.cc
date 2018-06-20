@@ -3649,8 +3649,7 @@ Expression* Parser::ParsePrimaryExpression(bool* ok) {
         result = ParseV8Intrinsic(CHECK_OK);
         break;
       }
-      // If we're not allowing special syntax we fall-through to the
-      // default case.
+      // intentional fallthrough
 
     default: {
       Token::Value tok = Next();
@@ -5376,8 +5375,8 @@ RegExpTree* RegExpParser::ParseDisjunction() {
       if (ParseIntervalQuantifier(&dummy, &dummy)) {
         ReportError(CStrVector("Nothing to repeat") CHECK_FAILED);
       }
-      // fallthrough
     }
+    // intentional fallthrough
     default:
       builder->AddCharacter(current());
       Advance();

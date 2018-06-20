@@ -1141,7 +1141,7 @@ bool Deoptimizer::DoOsrTranslateCommand(TranslationIterator* iterator,
       }
       output->SetRegister(output_reg, static_cast<int32_t>(uint32_value));
     }
-
+    // intentional fallthrough
 
     case Translation::DOUBLE_REGISTER: {
       // Abort OSR if we don't have a number.

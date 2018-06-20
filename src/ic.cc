@@ -1989,8 +1989,8 @@ void KeyedStoreIC::UpdateCaches(LookupResult* lookup,
             name, receiver, field_index, transition, strict_mode);
         break;
       }
-      // fall through.
     }
+    // intentional fallthrough
     case NORMAL:
     case CONSTANT_FUNCTION:
     case CALLBACKS:

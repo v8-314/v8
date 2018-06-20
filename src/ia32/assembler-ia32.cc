@@ -420,6 +420,7 @@ void Assembler::Nop(int bytes) {
     switch (bytes) {
       case 2:
         EMIT(0x66);
+        // intentional fallthrough
       case 1:
         EMIT(0x90);
         return;
@@ -436,6 +437,7 @@ void Assembler::Nop(int bytes) {
         return;
       case 6:
         EMIT(0x66);
+        // intentional fallthrough
       case 5:
         EMIT(0xf);
         EMIT(0x1f);
@@ -456,12 +458,15 @@ void Assembler::Nop(int bytes) {
       case 11:
         EMIT(0x66);
         bytes--;
+        // intentional fallthrough
       case 10:
         EMIT(0x66);
         bytes--;
+        // intentional fallthrough
       case 9:
         EMIT(0x66);
         bytes--;
+        // intentional fallthrough
       case 8:
         EMIT(0xf);
         EMIT(0x1f);

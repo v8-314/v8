@@ -2613,15 +2613,15 @@ class PointerChunkIterator BASE_EMBEDDED {
           return old_pointer_iterator_.next();
         }
         state_ = kMapState;
-        // Fall through.
       }
+      // intentional fallthrough
       case kMapState: {
         if (map_iterator_.has_next()) {
           return map_iterator_.next();
         }
         state_ = kLargeObjectState;
-        // Fall through.
       }
+      // intentional fallthrough
       case kLargeObjectState: {
         HeapObject* heap_object;
         do {
