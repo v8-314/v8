@@ -134,7 +134,7 @@
         'conditions': [
           ['component=="static_library"', {
             'defines': [
-              '_HAS_EXCEPTIONS=0',
+              '_HAS_EXCEPTIONS=1',
             ],
           }],
         ],
